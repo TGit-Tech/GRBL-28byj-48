@@ -353,8 +353,9 @@ ISR(TIMER1_COMPA_vect)
 
         // Initialize Bresenham line and distance counters
         st.counter_x = st.counter_y = st.counter_z = (st.exec_block->step_event_count >> 1);
+        // Apply direction invert mask once per block load (not every ISR tick).
+        st.exec_block->direction_bits ^= dir_port_invert_mask;
       }
-      //st.dir_outbits = st.exec_block->direction_bits ^ dir_port_invert_mask;
 
       #ifdef ADAPTIVE_MULTI_AXIS_STEP_SMOOTHING
         // With AMASS enabled, adjust Bresenham axis increment counters according to AMASS level.
@@ -386,8 +387,6 @@ ISR(TIMER1_COMPA_vect)
 
   // Reset step out bits.
   st.step_outbits = 0;
-	
-  st.exec_block->direction_bits = st.exec_block->direction_bits ^ dir_port_invert_mask;
 
   // Execute step displacement profile by Bresenham line algorithm
   #ifdef ADAPTIVE_MULTI_AXIS_STEP_SMOOTHING
